@@ -21,7 +21,7 @@ export interface UniversityOverview {
   country: string; city: string; state: string; university_type: string; campus_setting: string;
 }
 export interface University {
-  id: string; university_name: string; banner: string | null; logo: string | null; website: string | null; description: string | null;
+  id: string; university_name: string; banner: string | null; logo: string | null; website: string | null; about: string | null;
   overview: UniversityOverview | null;
 }
 export type UniversityBasicInfo = University;

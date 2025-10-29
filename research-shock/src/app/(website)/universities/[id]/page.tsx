@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: PageProps) {
     
     return {
       title: `${basicInfo.university_name} - ResearchShock`,
-      description: basicInfo.description || basicInfo.overview?.description || `Learn more about ${basicInfo.university_name}`,
+      description: basicInfo.about || basicInfo.overview?.description || `Learn more about ${basicInfo.university_name}`,
     };
   } catch (error) {
     return {

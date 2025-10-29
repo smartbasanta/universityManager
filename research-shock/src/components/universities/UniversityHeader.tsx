@@ -19,8 +19,8 @@ export const UniversityHeader = ({ basicInfo }: UniversityHeaderProps) => {
   
   // The header now receives the lean 'basicInfo' object.
   const name = basicInfo.university_name;
-  const location = `${basicInfo.university_overview?.city || ''}, ${basicInfo.university_overview?.state || ''}`.trim() || basicInfo.country;
-  const description = basicInfo.description || basicInfo.university_overview?.description || 'No description available.';
+  const location = `${basicInfo.overview?.city || ''}, ${basicInfo.overview?.state || ''}`.trim() || basicInfo.overview?.country;
+  const description = basicInfo.about || basicInfo.overview?.description || 'No description available.';
   const website = basicInfo.website;
   const image = basicInfo.logo || basicInfo.banner || '/no-image.jpg';
 
@@ -49,7 +49,7 @@ export const UniversityHeader = ({ basicInfo }: UniversityHeaderProps) => {
                 <span className="text-lg">{location}</span>
               </div>
               <p className="text-gray-700 leading-relaxed max-w-3xl">
-                {description}
+                {description ?? basicInfo.overview?.description}
               </p>
             </div>
             
