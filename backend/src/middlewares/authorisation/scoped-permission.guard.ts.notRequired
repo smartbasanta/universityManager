@@ -1,0 +1,60 @@
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { PERMISSION_KEY } from './permission.decorator';
+import { JwtPayload } from 'src/helper/types/index.type';
+import { PermissionService } from 'src/modules/access-control/permission/permission.service';
+
+@Injectable()
+export class ScopedPermissionGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private permissionService: PermissionService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredPermission = this.reflector.get<string>(
+      PERMISSION_KEY,
+      context.getHandler(),
+    );
+
+    // If no permission is required for this endpoint, allow access by default.
+    if (!requiredPermission) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest();
+    const user: JwtPayload = request.user; // Assuming AtGuard has already attached the user payload.
+
+    if (!user || !user.sub) {
+      throw new InternalServerErrorException('User not found on request object. Ensure AtGuard is active.');
+    }
+
+    // Determine the scope of the request by looking at URL parameters.
+    const params = request.params;
+
+    // A flexible way to find a relevant ID from params.
+    const universityId = params.id || params.universityId;
+    const departmentId = params.departmentId;
+    const institutionId = params.institutionId;
+
+    const hasPermission = await this.permissionService.userHasPermission(
+      user.sub,
+      requiredPermission,
+      { universityId, departmentId, institutionId },
+    );
+
+    if (hasPermission) {
+      return true;
+    } else {
+      throw new ForbiddenException(
+        `You do not have the required permission (${requiredPermission}) for this resource.`,
+      );
+    }
+  }
+}

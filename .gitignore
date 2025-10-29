@@ -1,0 +1,103 @@
+# =============================================================================
+# Generic Rules for All Projects
+# =============================================================================
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS generated files
+.DS_Store
+
+# IDEs and editors configs
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VSCode
+# Allow team-level settings but ignore user-specific ones
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Environment variables
+# Contains sensitive credentials. NEVER commit these.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Certificates
+*.pem
+
+# Temporary files
+.temp
+.tmp
+
+
+# =============================================================================
+# Backend ('backend/') Project Specific
+# =============================================================================
+
+# Dependencies
+backend/node_modules
+
+# Compiled output
+backend/dist
+backend/build
+
+# Tests
+backend/coverage
+backend/.nyc_output
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+backend/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+
+# =============================================================================
+# Next.js ('research-shock/') Project Specific
+# =============================================================================
+
+# Dependencies
+research-shock/node_modules
+research-shock/.pnp
+research-shock/.pnp.*
+research-shock/.yarn/*
+!research-shock/.yarn/patches
+!research-shock/.yarn/plugins
+!research-shock/.yarn/releases
+!research-shock/.yarn/versions
+
+# Testing
+research-shock/coverage
+
+# Next.js build output
+research-shock/.next/
+research-shock/out/
+research-shock/build
+
+# Vercel platform files
+research-shock/.vercel
+
+# TypeScript build info
+research-shock/*.tsbuildinfo
+research-shock/next-env.d.ts
