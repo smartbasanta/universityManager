@@ -11,6 +11,7 @@ import { TagsFilter } from '@/components/research-news/TagsFilter';
 import { Pagination } from '@/components/research-news/Pagination';
 import { websiteResearchNewsAPI, ResearchArticle } from '@/hooks/api/website/research-news.api';
 import { useBreakpoint } from '@/hooks/use-mobile'; // Import the enhanced hook
+import { PageLayout } from '@/components/layout/page-layout';
 
 // Static categories matching dashboard form
 const staticCategories = [
@@ -356,19 +357,9 @@ export default function ResearchNewsPage() {
   ].reduce((a, b) => a + b, 0);
 
   return (
-    <div className="relative flex flex-col bg-white min-h-screen text-gray-800">
-      <div className="layout-container flex flex-col">
-        <Header />
-        
-        <main className={`container mx-auto px-4 sm:px-6 lg:px-8 ${
-          isMobile ? 'py-6' : isTablet ? 'py-8' : 'py-12'
-        }`}>
-          {/* Page Title */}
-          <h1 className={`font-bold text-gray-900 mb-8 ${
-            isMobile ? 'text-2xl' : isTablet ? 'text-3xl' : 'text-4xl'
-          }`}>
-            Research News
-          </h1>
+    <PageLayout title="Research News"
+    description="Find the latest research News">
+    
           
           {/* Mobile Filter Toggle */}
           {isMobile && (
@@ -524,10 +515,7 @@ export default function ResearchNewsPage() {
               />
             </div>
           )}
-        </main>
         
-        <Footer />
-      </div>
-    </div>
+    </PageLayout>
   );
 }

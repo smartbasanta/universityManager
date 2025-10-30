@@ -75,10 +75,10 @@ import { CountryEntity } from 'src/model/country.entity';
 
 
 // --- CONSTANTS FOR SEEDING ---
-const NUM_UNIVERSITIES = 2;
-const NUM_INSTITUTIONS = 3;
-const NUM_DEPARTMENTS_PER_UNI = 2;
-const NUM_STAFF_PER_UNI = 3;
+const NUM_UNIVERSITIES = 10;
+const NUM_INSTITUTIONS = 10;
+const NUM_DEPARTMENTS_PER_UNI = 10;
+const NUM_STAFF_PER_UNI = 10;
 const NUM_STUDENTS_PER_UNI = 10;
 @Injectable()
 export class SeedService implements OnModuleInit {

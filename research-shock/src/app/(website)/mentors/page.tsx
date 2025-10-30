@@ -224,7 +224,7 @@ export default function MentorsPage() {
         <Header />
         
         <div className="gap-1 px-6 flex flex-1 justify-center py-5">
-          <div className="layout-content-container flex flex-col max-w-[1260px] flex-1">
+          <div className="layout-content-container flex flex-col max-w-[1600px] flex-1">
             <div className="flex flex-wrap justify-between gap-3 p-4">
               <div className="flex min-w-72 flex-col gap-3">
                 <p className="text-[#101418] tracking-light text-2xl md:text-[32px] font-bold leading-tight">
