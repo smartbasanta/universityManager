@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { SearchFilters } from '@/components/research-news/SearchFilters';
 import { CategoryFilter } from '@/components/research-news/CategoryFilter';
 import { TrendingButton } from '@/components/research-news/TrendingButton';
