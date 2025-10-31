@@ -25,10 +25,8 @@ export const PageLayout = ({
       {showHeader && <Header />}
       
       <main className="flex-1">
-        {/* CONSISTENT CONTAINER - Same as Header and Footer */}
         <div className="px-4 sm:px-6 lg:px-40 py-8">
           <div className={`layout-content-container flex flex-col max-w-[1600px] flex-1 mx-auto ${containerClassName}`}>
-            {/* Optional Page Header */}
             {(title || description) && (
               <div className="text-center mb-8">
                 {title && (

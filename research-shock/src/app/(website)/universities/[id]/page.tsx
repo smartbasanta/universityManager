@@ -1,5 +1,3 @@
-// 'use client';
-
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -18,17 +16,19 @@ export default async function UniversityPage({ params }: PageProps) {
   try {
     const { id } = await params;
     const basicInfo = await websiteUniversityAPI.fetchUniversityBasicInfo(id);
+    console.log(basicInfo);
     return (
-      <div className="relative flex flex-col bg-white min-h-screen">
+      <div className="relative flex flex-col bg-gray-50 min-h-screen">
         <Header />
-        <main>
-          {/* just the clean basicInfo. */}
+        <main className="flex-grow">
           <UniversityHeader basicInfo={basicInfo} />
           
-          <SchoolTabs 
-            universityId={id}
-            initialData={basicInfo}
-          />
+          <div className="container mx-auto px-4 py-12">
+            <SchoolTabs 
+              universityId={id}
+              initialData={basicInfo}
+            />
+          </div>
         </main>
         <Footer />
       </div>
@@ -42,7 +42,7 @@ export default async function UniversityPage({ params }: PageProps) {
 
 export async function generateMetadata({ params }: PageProps) {
   try {
-        const { id } = await params;
+    const { id } = await params;
     const basicInfo = await websiteUniversityAPI.fetchUniversityBasicInfo(id);
     
     return {

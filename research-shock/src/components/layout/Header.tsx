@@ -220,9 +220,9 @@ export const Header = ({
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 w-full border-b border-gray-200">
-      <div className="w-full mx-auto">
+        <div className="max-w-[1850px] mx-auto">
           <div className="px-4 sm:px-6 lg:px-40">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center h-16">
             {/* Logo */}
             <div className="flex items-center flex-shrink-0">
               <Link href="/" className="font-bold text-gray-900 text-xl hover:text-blue-600 transition-colors">

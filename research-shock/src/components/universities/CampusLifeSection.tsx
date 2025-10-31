@@ -1,57 +1,44 @@
-import { Home, Utensils, Dumbbell, Users, HeartHandshake } from "lucide-react";
-import type { StudentLife } from '@/hooks/api/website/university.api';
+// New component: sections/CampusLifeSection.tsx
+"use client";
 
-interface CampusLifeSectionProps {
-  studentLife?: StudentLife;
+import { Home, Utensils, Dumbbell, Users } from 'lucide-react';
+
+interface CampusLifeInfo {
+  housing: { title: string; description: string; options: string[] };
+  dining: { title: string; description: string; options: string[] };
+  recreation: { title: string; description: string; facilities: string[] };
+  organizations: { title: string; description: string; count: number; examples: string[] };
 }
 
-export const CampusLifeSection = ({ studentLife }: CampusLifeSectionProps) => {
-  if (!studentLife) return null;
+export const CampusLifeSection = ({ campusLifeInfo }: { campusLifeInfo: CampusLifeInfo }) => {
+  const sections = [
+    { icon: Home, ...campusLifeInfo.housing },
+    { icon: Utensils, ...campusLifeInfo.dining },
+    { icon: Dumbbell, ...campusLifeInfo.recreation },
+    { icon: Users, ...campusLifeInfo.organizations },
+  ];
 
   return (
-    <section id="student-life-details" className="py-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Student Life</h2>
-      <p className="text-lg text-gray-700 mb-8 max-w-3xl">{studentLife.description || 'Experience vibrant campus life with diverse opportunities for growth and connection.'}</p>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Student Organizations */}
-        {studentLife.organizations && studentLife.organizations.length > 0 && (
-          <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-            <div className="flex items-center mb-4">
-              <Users className="w-7 h-7 text-blue-600 mr-3" />
-              <h3 className="text-xl font-semibold text-gray-800">Student Organizations</h3>
+    <section id="campus-life" className="space-y-6">
+      <h2 className="text-3xl font-bold text-gray-800">Campus Life</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {sections.map((sec, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <sec.icon className="w-6 h-6 text-blue-600" />
+              <h3 className="text-xl font-semibold text-gray-800">{sec.title}</h3>
             </div>
-            <ul className="space-y-2">
-              {studentLife.organizations.map((org, index) => (
-                <li key={index} className="flex items-center text-gray-700">
-                  <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                  {org.name}
-                </li>
-              ))}
-            </ul>
+            <p className="text-gray-700 mb-4">{sec.description}</p>
+            {('options' in sec && sec.options.length > 0) || ('facilities' in sec && sec.facilities.length > 0) || ('examples' in sec && sec.examples.length > 0) ? (
+              <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                {('options' in sec ? sec.options : 'facilities' in sec ? sec.facilities : sec.examples).map((item: string, j: number) => (
+                  <li key={j}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
+            {'count' in sec && <p className="mt-4 text-blue-600 font-medium">Over {sec.count} organizations available</p>}
           </div>
-        )}
-
-        {/* University Traditions */}
-        {studentLife.traditions && studentLife.traditions.length > 0 && (
-          <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-            <div className="flex items-center mb-4">
-              <HeartHandshake className="w-7 h-7 text-green-600 mr-3" />
-              <h3 className="text-xl font-semibold text-gray-800">University Traditions</h3>
-            </div>
-            <ul className="space-y-2">
-              {studentLife.traditions.map((trad, index) => (
-                <li key={index} className="flex items-center text-gray-700">
-                  <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                  {trad.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Placeholder for other campus life aspects if needed, e.g., Housing, Dining, Recreation */}
-        {/* These would come from other parts of GeneralSectionData or separate API calls if available */}
+        ))}
       </div>
     </section>
   );

@@ -1,535 +1,150 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAuthStore } from '@/stores/useAuth';
-import { AuthModals } from './AuthModals';
-import { useMobile } from '@/hooks/use-mobile';
-import type { Notification } from '@/types/profile/profile';
-import { fixPhotoUrl } from '@/utils/imageUtils';
-import { NotificationDropdown, NotificationItem as NotificationDropdownItem } from '@/components/ui/visitor-screen/notification';
-import { 
-  User, 
-  LogOut, 
-  Menu, 
-  X, 
-  Home, 
-  Newspaper, 
-  GraduationCap, 
-  Award, 
-  Briefcase, 
-  Users2, 
-  Target
-} from 'lucide-react';
+import Image from 'next/image';
+import { MapPin, Globe, Phone, Mail, Star, ExternalLink } from "lucide-react";
+import type { UniversityBasicInfo, Ranking } from "@/hooks/api/website/university.api";
 
-interface HeaderProps {
-  notifications?: Notification[];
-  onNotificationClick?: (notification: Notification) => void;
-  onMarkAsRead?: (id: string) => void;
+interface UniversityHeaderProps {
+  basicInfo: UniversityBasicInfo;
+  rankings?: Ranking[]; // Optional rankings prop
 }
 
-export const Header = ({ 
-  notifications = [],
-  onNotificationClick,
-  onMarkAsRead
-}: HeaderProps) => {
-  const pathname = usePathname();
-  const router = useRouter();
-  const isMobile = useMobile();
-  
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-  
-  const { 
-    isAuth, 
-    info, 
-    role, 
-    isLoading, 
-    logout, 
-    clearAll,
-    fetchUserInfo 
-  } = useAuthStore();
+const UniversityHeaderActions = ({ website, email, phone }: { website?: string; email?: string; phone?: string }) => (
+  <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
+    {website && (
+      <a href={website} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+        <ExternalLink className="w-4 h-4 mr-2" />
+        <span>Website</span>
+      </a>
+    )}
+    {email && (
+      <a href={`mailto:${email}`} className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+        <Mail className="w-4 h-4 mr-2" />
+        <span>Email</span>
+      </a>
+    )}
+    {phone && (
+      <div className="flex items-center text-gray-700">
+        <Phone className="w-4 h-4 mr-2" />
+        <span>{phone}</span>
+      </div>
+    )}
+  </div>
+);
 
-  useEffect(() => {
-    if (isAuth && !info && !isLoading) {
-      fetchUserInfo();
-    }
-  }, [isAuth, info, isLoading, fetchUserInfo]);
+export const UniversityHeader = ({ basicInfo, rankings }: UniversityHeaderProps) => {
+  if (!basicInfo) {
+    return null;
+  }
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-        setShowMobileMenu(false);
-      }
-    };
+  const {
+    university_name: name,
+    overview,
+    about,
+    website,
+    logo,
+    banner,
+  } = basicInfo;
 
-    if (showMobileMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+  const location = `${overview?.city || ''}${overview?.city && overview?.state ? ', ' : ''}${overview?.state || ''}`.trim();
+  const displayLocation = location || overview?.country || 'Location not available';
+  const description = about || overview?.description || 'No description available.';
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'unset';
-    };
-  }, [showMobileMenu]);
+  const bannerImage = banner || '/classroom.jpg'; 
+  const logoImage = logo || '/no-image.jpg';
 
-  useEffect(() => {
-    setShowMobileMenu(false);
-  }, [pathname]);
-
-  const getNavItemClass = (href: string) => {
-    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
-    return isActive 
-      ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1"
-      : "text-gray-600 hover:text-blue-600 transition-colors";
-  };
-
-  const getMobileNavItemClass = (href: string) => {
-    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
-    return isActive 
-      ? "text-blue-600 font-semibold bg-blue-50 border-l-4 border-blue-600"
-      : "text-gray-700 hover:text-blue-600 hover:bg-gray-50";
-  };
-
-  const handleLogout = () => {
-    try {
-      setShowUserMenu(false);
-      setShowMobileMenu(false);
-      clearAll();
-      logout();
-      
-      localStorage.removeItem("rToken");
-      sessionStorage.removeItem("rToken");
-      localStorage.removeItem("auth-store");
-      sessionStorage.removeItem("auth-store");
-      
-      router.push('/');
-      
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
-      
-    } catch (error) {
-      console.error('Error during logout:', error);
-      router.push('/');
-    }
-  };
-
-  const getUserName = () => {
-    return info?.name || 'User';
-  };
-
-  const getRoleDisplayName = () => {
-    switch (role) {
-      case 'university': return 'University';
-      case 'institution': return 'Institution';
-      case 'student_ambassador': return 'Student Ambassador';
-      case 'mentor': return 'Mentor';
-      case 'student': return 'Student';
-      default: return 'User';
-    }
-  };
-
-  const getUserInitials = (name: string | undefined) => {
-    if (!name) {
-      switch (role) {
-        case 'university': return 'UN';
-        case 'institution': return 'IN';
-        case 'student_ambassador': return 'SA';
-        case 'mentor': return 'ME';
-        default: return 'U';
-      }
-    }
-    
-    return name
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join('');
-  };
-
-  const getAvatar = () => {
-    const { pp } = useAuthStore.getState();
-    
-    if (pp && typeof pp === 'string') {
-      const correctedPhotoUrl = fixPhotoUrl(pp);
-      if (correctedPhotoUrl) {
-        return correctedPhotoUrl;
-      }
-    }
-    
-    if (role === 'student') {
-      return '/ambassador-default.png';
-    }
-    
-    const initials = getUserInitials(info?.name);
-    const svg = `
-      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" fill="#3B82F6" rx="20"/>
-        <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">${initials}</text>
-      </svg>
-    `;
-    
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  };
-
-  const getAvatarFallback = () => {
-    if (role === 'student') {
-      return '/ambassador-default.png';
-    }
-    
-    const initials = getUserInitials(info?.name);
-    const svg = `
-      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" fill="#3B82F6" rx="20"/>
-        <text x="20" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">${initials}</text>
-      </svg>
-    `;
-    
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  };
-
-  const getDashboardRoute = () => {
-    switch (role) {
-      case 'university':
-      case 'institution':
-      case 'student_ambassador':
-      case 'mentor':
-        return '/dashboard';
-      case 'student':
-        return '/';
-      default:
-        return '/dashboard';
-    }
-  };
-
-  const navigationItems = [
-    { href: '/research-news', label: 'Research News', icon: Newspaper },
-    { href: '/universities', label: 'Universities', icon: GraduationCap },
-    { href: '/scholarships', label: 'Scholarships', icon: Award },
-    { href: '/jobs', label: 'Jobs', icon: Briefcase },
-    { href: '/mentors', label: 'Mentors', icon: Users2 },
-    { href: '/opportunity-hub', label: 'Opportunities', icon: Target },
-  ];
+  // Find national and global ranks if available
+  const nationalRank = rankings?.find(r => r.subject === 'National');
+  const globalRank = rankings?.find(r => r.subject === 'Global');
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50 w-full border-b border-gray-200">
-      <div className="w-full max-w-[1600px] mx-auto">
-        <div className="px-4 sm:px-6 lg:px-40">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center flex-shrink-0">
-              <Link href="/" className="font-bold text-gray-900 text-xl hover:text-blue-600 transition-colors">
-                ResearchShock
-              </Link>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex space-x-8 items-center flex-1 justify-center">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link 
-                    key={item.href}
-                    className={`${getNavItemClass(item.href)} text-sm whitespace-nowrap flex items-center gap-2`}
-                    href={item.href}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-            
-            {/* Desktop Right Side */}
-            <div className="hidden lg:flex items-center space-x-4 flex-shrink-0">
-              {!isAuth && <AuthModals />}
-
-              {isAuth && (
-                <>
-                  {info?.name && !isLoading && (
-                    <span className="hidden xl:block text-sm text-gray-600">
-                      Welcome, {getUserName()}
-                    </span>
-                  )}
-
-                  <div className="relative">
-                    <NotificationDropdown
-                      notifications={notifications as NotificationDropdownItem[]}
-                      onNotificationClick={onNotificationClick}
-                      onMarkAsRead={onMarkAsRead}
-                    />
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(!showUserMenu);
-                        setShowNotifications(false);
-                      }}
-                      className="focus:outline-none relative"
-                    >
-                      <img
-                        src={getAvatar()}
-                        alt={getUserName()}
-                        className="rounded-full size-10 object-cover border-2 border-gray-200 hover:border-blue-400 transition-colors"
-                        onError={(e) => {
-                          e.currentTarget.src = getAvatarFallback();
-                        }}
-                      />
-                      {isLoading && (
-                        <div className="absolute inset-0 bg-gray-200 rounded-full animate-pulse"></div>
-                      )}
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
-                    </button>
-
-                    {showUserMenu && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
-                        {info && (
-                          <div className="px-4 py-3 border-b border-gray-100">
-                            <div className="flex items-center space-x-3">
-                              <img
-                                src={getAvatar()}
-                                alt={getUserName()}
-                                className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                                onError={(e) => {
-                                  e.currentTarget.src = getAvatarFallback();
-                                }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 truncate">
-                                  {getUserName()}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {getRoleDisplayName()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="py-1">
-                          {role === 'student' ? (
-                            <>
-                              <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <User className="w-4 h-4" /> Profile
-                              </Link>
-                              <Link href="/saved" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span className="w-4 h-4">⭐</span> Saved
-                              </Link>
-                              <Link href="/account-settings" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span className="w-4 h-4">⚙️</span> Settings
-                              </Link>
-                            </>
-                          ) : (
-                            <>
-                              <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <User className="w-4 h-4" /> Profile
-                              </Link>
-                              <Link href={getDashboardRoute()} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span className="w-4 h-4">📊</span> Dashboard
-                              </Link>
-                              <Link href="#" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span className="w-4 h-4">⭐</span> Saved
-                              </Link>
-                              <Link href="/account-settings" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span className="w-4 h-4">⚙️</span> Settings
-                              </Link>
-                            </>
-                          )}
-                          
-                          <div className="border-t border-gray-100 mt-1"></div>
-                          <button 
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <LogOut className="w-4 h-4" />
-                            Logout
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Mobile Right Side */}
-            <div className="lg:hidden flex items-center space-x-3">
-              {isAuth ? (
-                <>
-                  <div className="relative">
-                    <NotificationDropdown
-                      notifications={notifications as NotificationDropdownItem[]}
-                      onNotificationClick={onNotificationClick}
-                      onMarkAsRead={onMarkAsRead}
-                    />
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(!showUserMenu);
-                        setShowMobileMenu(false);
-                      }}
-                      className="focus:outline-none relative"
-                    >
-                      <img
-                        src={getAvatar()}
-                        alt={getUserName()}
-                        className="rounded-full size-8 object-cover border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src = getAvatarFallback();
-                        }}
-                      />
-                      <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border border-white rounded-full"></div>
-                    </button>
-
-                    {showUserMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
-                        {info && (
-                          <div className="px-4 py-3 border-b border-gray-100">
-                            <div className="flex items-center space-x-3">
-                              <img
-                                src={getAvatar()}
-                                alt={getUserName()}
-                                className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                                onError={(e) => {
-                                  e.currentTarget.src = getAvatarFallback();
-                                }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 truncate">
-                                  {getUserName()}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {getRoleDisplayName()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="py-1">
-                          {role === 'student' ? (
-                            <>
-                              <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <User className="w-4 h-4" /> Profile
-                              </Link>
-                              <Link href="/saved" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <span className="w-4 h-4">⭐</span> Saved
-                              </Link>
-                              <Link href="/account-settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <span className="w-4 h-4">⚙️</span> Settings
-                              </Link>
-                            </>
-                          ) : (
-                            <>
-                              <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <User className="w-4 h-4" /> Profile
-                              </Link>
-                              <Link href={getDashboardRoute()} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <span className="w-4 h-4">📊</span> Dashboard
-                              </Link>
-                              <Link href="#" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <span className="w-4 h-4">⭐</span> Saved
-                              </Link>
-                              <Link href="/account-settings" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <span className="w-4 h-4">⚙️</span> Settings
-                              </Link>
-                            </>
-                          )}
-                          
-                          <div className="border-t border-gray-100 mt-1"></div>
-                          <button 
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                          >
-                            <LogOut className="w-4 h-4" />
-                            Logout
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <AuthModals />
-                </div>
-              )}
-
-              <button
-                onClick={() => {
-                  setShowMobileMenu(!showMobileMenu);
-                  setShowUserMenu(false);
-                }}
-                className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-colors"
-                aria-label="Toggle mobile menu"
-              >
-                {showMobileMenu ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+    <div id="overview" className="relative bg-gray-50 pb-16 lg:pb-24">
+      {/* Banner Image */}
+      <div className="relative h-48 lg:h-64 w-full overflow-hidden">
+        <Image
+          src={bannerImage}
+          alt={`${name} Banner`}
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+          onError={(e) => {
+            e.currentTarget.srcset = '/classroom.jpg';
+            e.currentTarget.src = '/classroom.jpg';
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
 
-      {/* Mobile Menu - FIXED */}
-      {showMobileMenu && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50">
-          <div 
-            ref={mobileMenuRef}
-            className="absolute top-0 right-0 w-80 max-w-[85vw] h-full bg-white shadow-xl overflow-y-auto"
-          >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
-              <button
-                onClick={() => setShowMobileMenu(false)}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <div className="container mx-auto px-4 relative z-10 -mt-20 lg:-mt-28">
+        <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6">
+          {/* Logo and Name Section */}
+          <div className="flex-shrink-0 flex items-end gap-6">
+            <div className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full shadow-lg border-4 border-white bg-white overflow-hidden">
+              <Image
+                src={logoImage}
+                alt={`${name} Logo`}
+                fill
+                sizes="(max-width: 768px) 128px, 160px"
+                className="object-contain p-2"
+                onError={(e) => {
+                  e.currentTarget.srcset = '/no-image.jpg';
+                  e.currentTarget.src = '/no-image.jpg';
+                }}
+              />
             </div>
+            <div className="flex flex-col mb-2">
+              <h1 className="text-3xl lg:text-5xl font-extrabold text-white drop-shadow-md leading-tight">
+                {name}
+              </h1>
+              {displayLocation && (
+                <div className="flex items-center text-gray-200 drop-shadow-sm mt-1">
+                  <MapPin className="w-5 h-5 mr-2 text-black" />
+                  <span className="text-lg font-medium text-black">{displayLocation}</span>
+                </div>
+              )}
+              
+            </div>
+          </div>
 
-            <nav className="px-4 py-6 space-y-1">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`${getMobileNavItemClass(item.href)} flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors`}
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {!isAuth && (
-              <div className="px-4 py-6 border-t border-gray-200">
-                <AuthModals />
-              </div>
-            )}
-
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <p className="text-xs text-center text-gray-500">© 2024 ResearchShock</p>
+          {/* Rankings */}
+          <div className="flex-1 flex justify-start lg:justify-end w-full lg:w-auto mt-4 lg:mt-0">
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 flex items-center gap-6 shadow-lg border border-gray-100">
+              {nationalRank ? (
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-800">{nationalRank.rank}</div>
+                  <div className="text-sm text-gray-600">National Rank</div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-400">N/A</div>
+                  <div className="text-sm text-gray-500">National Rank</div>
+                </div>
+              )}
+              <div className="border-l border-gray-200 h-12"></div>
+              {globalRank ? (
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-800">{globalRank.rank}</div>
+                  <div className="text-sm text-gray-600">Global Rank</div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-400">N/A</div>
+                  <div className="text-sm text-gray-500">Global Rank</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      )}
-    </header>
+
+        {/* Description and Actions */}
+        <div className="mt-8 lg:mt-6 bg-white p-6 rounded-xl shadow-md border border-gray-100">
+          <p className="text-gray-700 leading-relaxed max-w-4xl text-base">
+            {description}
+          </p>
+          <UniversityHeaderActions website={website} email={overview?.email} phone={overview?.phone_number} />
+        </div>
+      </div>
+    </div>
   );
 };

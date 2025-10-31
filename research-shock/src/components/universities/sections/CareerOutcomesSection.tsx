@@ -1,9 +1,10 @@
 import React from 'react';
 import UniversitySkeleton from '@/components/universities/UniversitySkeleton';
-import { Briefcase, DollarSign, TrendingUp } from 'lucide-react';
+import { Briefcase, DollarSign, TrendingUp, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface CareerOutcomesSectionProps {
-  careerOutcomes: any; // Replace 'any' with actual type when available
+  careerOutcomes: any;
   isLoading: boolean;
   error: any;
 }
@@ -13,47 +14,43 @@ export const CareerOutcomesSection = ({ careerOutcomes, isLoading, error }: Care
   if (error) return <div className="text-center py-10 text-red-600">Failed to load career outcomes.</div>;
   if (!careerOutcomes) return <div className="text-center py-10 text-gray-500">No career outcomes data available.</div>;
 
+  const stats = [
+    { icon: Briefcase, label: 'Employment Rate', value: `${careerOutcomes.employment_rate}%` || 'N/A', color: 'blue-600' },
+    { icon: DollarSign, label: 'Average Salary', value: careerOutcomes.average_salary || 'N/A', color: 'green-600' },
+    { icon: TrendingUp, label: 'Salary Growth', value: careerOutcomes.salary_growth || 'N/A', color: 'purple-600' },
+    { icon: Users, label: 'Top Employers', value: careerOutcomes.top_employers?.join(', ') || 'N/A', color: 'indigo-600' },
+  ];
+
   return (
-    <div id="career-outcomes" className="py-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Career Outcomes</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Example: Employment Rate */}
-        {careerOutcomes.employment_rate && (
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 flex items-start">
-            <Briefcase className="w-7 h-7 text-blue-600 mr-4 flex-shrink-0" />
-            <div>
-              <p className="text-3xl font-bold text-gray-800">{careerOutcomes.employment_rate}%</p>
-              <p className="text-gray-600 text-lg">Employment Rate</p>
-            </div>
-          </div>
-        )}
-
-        {/* Example: Average Salary */}
-        {careerOutcomes.average_salary && (
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 flex items-start">
-            <DollarSign className="w-7 h-7 text-green-600 mr-4 flex-shrink-0" />
-            <div>
-              <p className="text-3xl font-bold text-gray-800">{careerOutcomes.average_salary}</p>
-              <p className="text-gray-600 text-lg">Average Starting Salary</p>
-            </div>
-          </div>
-        )}
-
-        {/* Example: Top Industries */}
-        {careerOutcomes.top_industries && careerOutcomes.top_industries.length > 0 && (
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 lg:col-span-1 flex items-start">
-            <TrendingUp className="w-7 h-7 text-purple-600 mr-4 flex-shrink-0" />
-            <div>
-              <p className="text-xl font-bold text-gray-800 mb-2">Top Industries</p>
-              <ul className="space-y-1">
-                {careerOutcomes.top_industries.map((industry: string, index: number) => (
-                  <li key={index} className="text-gray-700">{industry}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+    <section id="career-outcomes" className="space-y-8">
+      <h2 className="text-3xl font-bold text-gray-800">Career Outcomes</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center border border-gray-100 hover:shadow-xl transition-shadow"
+          >
+            <stat.icon className={`w-10 h-10 text-${stat.color} mb-4`} />
+            <p className="text-3xl font-bold text-gray-800 mb-2">{stat.value}</p>
+            <p className="text-gray-600 font-medium">{stat.label}</p>
+          </motion.div>
+        ))}
       </div>
-    </div>
+      {careerOutcomes.top_industries && careerOutcomes.top_industries.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">Top Industries</h3>
+          <div className="flex flex-wrap gap-2">
+            {careerOutcomes.top_industries.map((industry: string, index: number) => (
+              <span key={index} className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-medium text-sm">
+                {industry}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
