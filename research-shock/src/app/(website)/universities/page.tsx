@@ -6,7 +6,8 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { PageLayout } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/universities/SearchBar';
 import { FilterSection } from '@/components/universities/FilterSection';
-import { UniversityGrid } from '@/components/universities/UniversityGrid';
+import { UniversityCard } from '@/components/universities/UniversityCard';
+import UniversitySkeleton from '@/components/universities/UniversitySkeleton';
 
 import { websiteUniversityAPI } from '@/hooks/api/website/university.api';
 import type { University, UniversityQueryParams } from '@/hooks/api/website/university.api';
@@ -161,16 +162,23 @@ export default function UniversitiesPage() {
 
         {/* Grid Column */}
         <div className="lg:col-span-3">
-          {isError ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <UniversitySkeleton key={index} />
+              ))}
+            </div>
+          ) : isError ? (
             <div className="text-center py-10 bg-red-50 rounded-lg border border-red-200">
               <p className="text-red-600 font-medium">Failed to load universities</p>
               <p className="text-red-500 text-sm mt-1">Please try again later</p>
             </div>
           ) : (
-            <UniversityGrid 
-              universities={gridUniversities}
-              loading={isLoading}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {gridUniversities.map((university) => (
+                <UniversityCard key={university.id} university={university} />
+              ))}
+            </div>
           )}
         </div>
       </div>

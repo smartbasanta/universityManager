@@ -1,4 +1,4 @@
-import { SignupForm } from "@/components/form/signup-form";
+// import { SignupForm } from "@/components/form/signup-form";
 import { GalleryVerticalEnd } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer"; 
@@ -14,7 +14,7 @@ export default function SignupPage() {
              <h2 className="text-xl font-semibold text-center mb-4">University Sign Up</h2>
             
             {/* Signup Form */}
-            <SignupForm />
+            {/* <SignupForm /> */}
           </div>
         </div>
       </div>

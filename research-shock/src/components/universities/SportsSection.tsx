@@ -1,119 +1,82 @@
-import { Trophy, Target, Users2 } from "lucide-react";
-
-/* 1.  add `website?: string`  */
-interface SportsInfo {
-  overview: string;
-  teams: {
-    name: string;
-    league: string;
-    achievements?: string;
-  }[];
-  facilities: {
-    name: string;
-    description: string;
-    website?: string;      // ← new
-  }[];
-  intramurals: string[];
-}
+import { Trophy, Users, Building, ExternalLink } from "lucide-react";
+import type { Sports } from '@/hooks/api/website/university.api';
 
 interface SportsSectionProps {
-  sportsInfo: SportsInfo;
+  sports?: Sports;
 }
 
-export const SportsSection = ({ sportsInfo }: SportsSectionProps) => {
+export const SportsSection = ({ sports }: SportsSectionProps) => {
+  if (!sports) return null;
+
   return (
-    <section id="sports" className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        {/* header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-white" />
-            </div>
+    <section id="sports-details" className="py-8">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">University Sports</h2>
+      <p className="text-lg text-gray-700 mb-8 max-w-3xl">{sports.athletic_division || 'Discover the athletic spirit and achievements of the university.'}</p>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Athletic Overview */}
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <div className="flex items-center mb-4">
+            <Trophy className="w-7 h-7 text-yellow-600 mr-3" />
+            <h3 className="text-xl font-semibold text-gray-800">Athletic Overview</h3>
           </div>
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Athletics & Sports
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {sportsInfo.overview}
-          </p>
+          <ul className="space-y-2 text-gray-700">
+            {sports.athletic_division && (
+              <li className="flex justify-between items-center">
+                <span className="font-medium">Athletic Division:</span>
+                <span>{sports.athletic_division}</span>
+              </li>
+            )}
+            {sports.conference && (
+              <li className="flex justify-between items-center">
+                <span className="font-medium">Conference:</span>
+                <span>{sports.conference}</span>
+              </li>
+            )}
+          </ul>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Varsity Teams */}
-          <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-8 border border-red-100">
-            <div className="flex items-center mb-6">
-              <Trophy className="w-8 h-8 text-red-600 mr-4" />
-              <h3 className="text-xl font-bold text-gray-900">Varsity Teams</h3>
+        {/* Sports Teams */}
+        {sports.teams && sports.teams.length > 0 && (
+          <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+            <div className="flex items-center mb-4">
+              <Users className="w-7 h-7 text-blue-600 mr-3" />
+              <h3 className="text-xl font-semibold text-gray-800">Teams</h3>
             </div>
-            <div className="space-y-4">
-              {sportsInfo.teams.map((team, idx) => (
-                <div key={idx} className="bg-white rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900">{team.name}</h4>
-                  <p className="text-sm text-gray-600">{team.league}</p>
-                  {team.achievements && (
-                    <p className="text-xs text-red-600 mt-1">{team.achievements}</p>
-                  )}
-                </div>
+            <ul className="space-y-2">
+              {sports.teams.map((team, index) => (
+                <li key={index} className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
+                  {team.sport_name} ({team.gender})
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
+        )}
 
-          {/* Facilities */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-100">
-            <div className="flex items-center mb-6">
-              <Target className="w-8 h-8 text-blue-600 mr-4" />
-              <h3 className="text-xl font-bold text-gray-900">Sports Facilities</h3>
+        {/* Sports Facilities */}
+        {sports.facilities && sports.facilities.length > 0 && (
+          <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 md:col-span-2">
+            <div className="flex items-center mb-4">
+              <Building className="w-7 h-7 text-green-600 mr-3" />
+              <h3 className="text-xl font-semibold text-gray-800">Facilities</h3>
             </div>
-            <div className="space-y-4">
-              {sportsInfo.facilities.map((facility, idx) => (
-                <div key={idx} className="bg-white rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
-                        {facility.name}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {facility.description}
-                      </p>
-                    </div>
-
-                    {/* 2. Click-through link */}
-                    {facility.website && (
-                      <a
-                        href={facility.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline whitespace-nowrap"
-                      >
-                        Visit&nbsp;→
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Intramural Sports */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-8 border border-green-100">
-            <div className="flex items-center mb-6">
-              <Users2 className="w-8 h-8 text-green-600 mr-4" />
-              <h3 className="text-xl font-bold text-gray-900">Intramural Sports</h3>
-            </div>
-            <div className="space-y-3">
-              {sportsInfo.intramurals.map((sport, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center bg-white rounded-lg p-3"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {sports.facilities.map((facility, index) => (
+                <a 
+                  key={index} 
+                  href={facility.website || '#'} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <span className="w-2 h-2 bg-green-600 rounded-full mr-3" />
-                  <span className="text-gray-700">{sport}</span>
-                </div>
+                  <ExternalLink className="w-5 h-5 text-gray-500 mr-3 flex-shrink-0" />
+                  <span className="font-medium text-gray-700">{facility.name}</span>
+                </a>
               ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

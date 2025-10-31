@@ -1,44 +1,37 @@
 import type { Ranking } from '@/hooks/api/website/university.api';
+import { Award, Link as LinkIcon } from 'lucide-react';
 
 interface RankingSectionProps {
   rankings: Ranking[];
-  level: 'UNDERGRADUATE' | 'GRADUATE';
 }
 
-export const RankingSection = ({ rankings, level }: RankingSectionProps) => {
-  const filteredRankings = rankings.filter(rank => rank.status === level);
-  
-  if (filteredRankings.length === 0) return null;
-
-  const isUndergrad = level === 'UNDERGRADUATE';
-  const title = isUndergrad ? 'Undergraduate Rankings' : 'Graduate Rankings';
-  const theme = {
-    bg: isUndergrad ? 'bg-green-50' : 'bg-blue-50',
-    border: isUndergrad ? 'border-green-600' : 'border-blue-600',
-    text: isUndergrad ? 'text-green-900' : 'text-blue-900',
-    link: isUndergrad ? 'text-green-600 hover:text-green-800' : 'text-blue-600 hover:text-blue-800',
-  };
+export const RankingSection = ({ rankings }: RankingSectionProps) => {
+  if (!rankings || rankings.length === 0) return null;
 
   return (
-    <div id={`${level.toLowerCase()}-rankings`} className="py-8">
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
-        <div className="space-y-4">
-          {filteredRankings.map((rank) => (
-            <div key={rank.id} className={`${theme.bg} rounded-lg p-4 border-l-4 ${theme.border}`}>
-              <h3 className={`text-lg font-bold ${theme.text} mb-2`}>{rank.rank}</h3>
-              <p className="text-gray-700 mb-3">{rank.description}</p>
+    <div id="rankings" className="py-8">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">University Rankings</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rankings.map((rank, index) => (
+          <div key={index} className="bg-white rounded-xl shadow-md border border-gray-200 p-6 flex flex-col items-start transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center mb-4">
+              <Award className="h-7 w-7 text-blue-600 mr-3 flex-shrink-0" />
+              <h3 className="font-bold text-xl text-gray-800 leading-tight">{rank.rank}</h3>
+            </div>
+            <p className="text-gray-700 mt-1 text-base flex-grow">{rank.subject} ({rank.year})</p>
+            {rank.source_link && (
               <a 
                 href={rank.source_link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className={`${theme.link} text-sm font-medium hover:underline`}
+                className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors"
               >
-                View Source →
+                <LinkIcon className="w-4 h-4 mr-2" />
+                {rank.source}
               </a>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

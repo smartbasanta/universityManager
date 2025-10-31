@@ -1,104 +1,90 @@
-'use client';
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { websiteUniversityAPI } from '@/hooks/api/website/university.api';
 import type { UniversityBasicInfo } from '@/hooks/api/website/university.api';
-
 import { CampusLifeSection } from './CampusLifeSection';
 import { SportsSection } from './SportsSection';
 import { ReviewsSection } from './ReviewsSection';
-import { UniversitySidebar } from './UniversitySidebar';
+// import { UniversitySidebar } from './UniversitySidebar';
+import UniversitySkeleton from '@/components/universities/UniversitySkeleton';
+import { Building, Mail, Phone } from 'lucide-react';
+import { GeneralInfoSlider } from './sections/GeneralInfoSlider';
 
-// A smaller, focused transformer for just the general tab sections
-const transformGeneralSectionData = (sportsData: any, studentLifeData: any) => {
-  const campusLifeInfo = {
-    housing: {
-      title: 'Student Housing',
-      description: 'On-campus housing options are available.',
-      options: [],
-    },
-    dining: {
-      title: 'Dining Services',
-      description: 'A variety of meal plans and dining halls are available.',
-      options: [],
-    },
-    recreation: {
-      title: 'Recreation & Sports',
-      description: sportsData?.description || 'Recreation facilities available.',
-      facilities: (sportsData?.facilities || []).map((f: any) => f.name),
-    },
-    organizations: {
-      title: 'Student Organizations',
-      description: studentLifeData?.description || 'Over 300 student clubs and organizations.',
-      count: parseInt(studentLifeData?.no_of_students_organisation || '0', 10),
-      examples: (studentLifeData?.category || []).map((c: any) => c.name),
-    },
-  };
+const OverviewSection = ({ overview }: { overview: UniversityBasicInfo['overview'] }) => (
+  <div id="university-overview" className="py-8">
+    <h2 className="text-3xl font-bold text-gray-800 mb-6">University Overview</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="font-semibold text-gray-700 text-lg mb-2">Established</h3>
+        <p className="text-gray-800 text-xl font-bold">{overview?.established_in || 'N/A'}</p>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="font-semibold text-gray-700 text-lg mb-2">Type</h3>
+        <p className="text-gray-800 text-xl font-bold">{overview?.university_type || 'N/A'}</p>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 col-span-1 md:col-span-2">
+        <h3 className="font-semibold text-gray-700 text-lg mb-2">Mission Statement</h3>
+        <p className="text-gray-800 leading-relaxed">{overview?.mission_statement || 'No mission statement available.'}</p>
+      </div>
+    </div>
+  </div>
+);
 
-  const sportsInfo = {
-    overview: sportsData?.description || 'A proud member of its athletic conference.',
-    teams: [
-      ...(sportsData?.men_sports_teams || []).map((team: string) => ({ name: `Men's ${team}`, league: 'NCAA' })),
-      ...(sportsData?.women_sports_teams || []).map((team: string) => ({ name: `Women's ${team}`, league: 'NCAA' })),
-    ],
-    facilities: (sportsData?.facilities || []).map((facility: any) => ({
-      name: facility.name,
-      description: `State-of-the-art facility for ${facility.name}.`,
-      website: facility.website,
-    })),
-    intramurals: (sportsData?.intramural_sports || []).map((sport: any) => sport.name),
-  };
-  
-  return { campusLifeInfo, sportsInfo };
-};
+const ContactSection = ({ contact }: { contact: UniversityBasicInfo['overview'] }) => (
+  <div id="contacts" className="py-8">
+    <h2 className="text-3xl font-bold text-gray-800 mb-6">Contact Information</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="flex items-start bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <Mail className="w-6 h-6 mr-4 text-blue-600 flex-shrink-0" />
+        <div>
+          <h3 className="font-semibold text-gray-700 text-lg mb-1">Email</h3>
+          <a href={`mailto:${contact?.email}`} className="text-blue-600 hover:underline text-base break-all">{contact?.email || 'N/A'}</a>
+        </div>
+      </div>
+      <div className="flex items-start bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <Phone className="w-6 h-6 mr-4 text-green-600 flex-shrink-0" />
+        <div>
+          <h3 className="font-semibold text-gray-700 text-lg mb-1">Phone</h3>
+          <p className="text-gray-800 text-base">{contact?.phone_number || 'N/A'}</p>
+        </div>
+      </div>
+      <div className="flex items-start bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <Building className="w-6 h-6 mr-4 text-purple-600 flex-shrink-0" />
+        <div>
+          <h3 className="font-semibold text-gray-700 text-lg mb-1">Address</h3>
+          <p className="text-gray-800 text-base">{`${contact?.address || ''}, ${contact?.city || ''}, ${contact?.state || ''}, ${contact?.country || ''}`.replace(/, ,/g, ',').replace(/^, /,'').replace(/, $/, '') || 'N/A'}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export function GeneralTabContent({ universityId, initialData }: { universityId: string, initialData: UniversityBasicInfo }) {
-  // Fetch the remaining general sections on the client
-  const { data: sectionsData, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['universityGeneralSections', universityId],
-    queryFn: async () => {
-      const [sports, studentLife, research, alumni] = await Promise.all([
-        websiteUniversityAPI.fetchUniversitySportsSection(universityId),
-        // Add other API calls as you create them in university.api.ts
-        // For now, let's assume they exist
-        websiteUniversityAPI.fetchUniversityStudentLifeSection(universityId), 
-        websiteUniversityAPI.fetchUniversityResearchSection(universityId),
-        websiteUniversityAPI.fetchUniversityAlumniSection(universityId),
-      ]);
-      // A placeholder for the other sections until their API calls are added
-      return { sports, studentLife, research, alumni };
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    queryFn: () => websiteUniversityAPI.fetchGeneralSectionData(universityId),
+    staleTime: 1000 * 60 * 5,
   });
 
-  const { campusLifeInfo, sportsInfo } = transformGeneralSectionData(sectionsData?.sports?.university_sports, sectionsData?.studentLife);
+  if (isLoading) return <UniversitySkeleton />;
+  if (error) return <div className="text-center py-10 text-red-600">Failed to load general sections.</div>;
+  if (!data) return <div className="text-center py-10 text-gray-500">No general information available.</div>;
 
   return (
-    <div className="flex gap-8 max-w-7xl mx-auto">
-      <div className="hidden lg:block w-64 flex-shrink-0">
+    <div className="flex flex-col lg:flex-row gap-12">
+      <div className="w-full lg:w-64 flex-shrink-0">
         <UniversitySidebar />
       </div>
-      <div className="flex-1">
-        {/* Contact & Overview (from initial data) */}
-        <div id="contacts" className="py-8">
-          {/* ... Contact JSX from old page ... */}
-        </div>
-        {initialData.university_overview && (
-          <div id="university-overview" className="py-8">
-            {/* ... University Overview JSX from old page ... */}
-          </div>
-        )}
+      <div className="flex-1 min-w-0 space-y-8">
+        <GeneralInfoSlider>
+          {data.overview && <OverviewSection overview={data.overview} />}
+          {data.overview && <ContactSection contact={data.overview} />}
+        </GeneralInfoSlider>
         
-        {/* Sections loaded on the client */}
-        {isLoading && <div>Loading more sections...</div>}
-        {error && <div>Could not load all sections.</div>}
-
-        {sectionsData?.studentLife && <CampusLifeSection campusLifeInfo={campusLifeInfo} />}
-        {sectionsData?.sports && <SportsSection sportsInfo={sportsInfo} />}
-        {/* {sectionsData?.studentLife && <Alu campusLifeInfo={campusLifeInfo} />} */}
+        {data.student_life && <CampusLifeSection studentLife={data.student_life} />}
+        {data.sports && <SportsSection sports={data.sports} />}
         
-        <ReviewsSection universityId={universityId} />
+        <ReviewsSection universityId={universityId} reviews={data.reviews} isLoading={isLoading} error={!!error} />
       </div>
     </div>
   );

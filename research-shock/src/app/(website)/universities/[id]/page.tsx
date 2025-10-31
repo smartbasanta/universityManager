@@ -1,3 +1,5 @@
+// 'use client';
+
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -16,7 +18,6 @@ export default async function UniversityPage({ params }: PageProps) {
   try {
     const { id } = await params;
     const basicInfo = await websiteUniversityAPI.fetchUniversityBasicInfo(id);
-    console.log(basicInfo);
     return (
       <div className="relative flex flex-col bg-white min-h-screen">
         <Header />

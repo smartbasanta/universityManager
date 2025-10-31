@@ -14,6 +14,8 @@ export interface UniversityOverview {
   university_type: string;
   campus_setting: string; // Corrected from area_type
   description?: string;
+  email?: string;
+  phone_number?: string;
 }
 
 // Base University Interfaces
@@ -151,6 +153,16 @@ export const websiteUniversityAPI = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching basic info for university ${id}:`, error);
+      throw error;
+    }
+  },
+
+  fetchCareerOutcomes: async (id: string): Promise<any> => {
+    try {
+      const response = await axiosPublicInstance.get(`/website/universities/${id}/career-outcomes`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching career outcomes for university ${id}:`, error);
       throw error;
     }
   },

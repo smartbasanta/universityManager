@@ -1,37 +1,48 @@
-import type { UniversityMajor, GraduateMajor } from '@/hooks/api/website/university.api';
+import type { Department, Program } from '@/hooks/api/website/university.api';
+import { BookOpen, ExternalLink } from 'lucide-react';
 
 interface SchoolsSectionProps {
-  majors: (UniversityMajor | GraduateMajor)[];
+  departments: Department[];
   level: 'UNDERGRADUATE' | 'GRADUATE';
 }
 
-export const SchoolsSection = ({ majors, level }: SchoolsSectionProps) => {
-  if (!majors || majors.length === 0) return null;
+export const SchoolsSection = ({ departments, level }: SchoolsSectionProps) => {
+  if (!departments || departments.length === 0) return null;
   
   const isUndergrad = level === 'UNDERGRADUATE';
-  const title = isUndergrad ? 'Undergraduate Programs' : 'Graduate Programs';
-  const theme = {
-    bg: isUndergrad ? 'bg-green-50 hover:bg-green-100' : 'bg-blue-50 hover:bg-blue-100',
-  };
+  const title = isUndergrad ? 'Undergraduate Programs & Departments' : 'Graduate Programs & Departments';
+  const id = isUndergrad ? 'undergraduate-programs' : 'graduate-programs';
 
   return (
-    <div id={`${level.toLowerCase()}-programs`} className="py-8">
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
-        <div className="space-y-3">
-          {majors.slice(0, 10).map((major) => (
-            <a key={major.id} href={major.link || '#'} target="_blank" rel="noopener noreferrer" className={`block p-4 ${theme.bg} rounded-lg transition-colors`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">{major.name}</h3>
-                  {major.rank && (
-                    <p className="text-sm text-gray-600 mt-1">{major.rank}</p>
+    <div id={id} className="py-8">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">{title}</h2>
+      <div className="space-y-8">
+        {departments.map((department) => (
+          <div key={department.name} className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+              <BookOpen className="w-6 h-6 text-blue-600 mr-3" />
+              {department.name}
+            </h3>
+            <ul className="divide-y divide-gray-100">
+              {department.programs.map((program) => (
+                <li key={program.name} className="py-4 flex items-center justify-between">
+                  <p className="text-lg text-gray-700 font-medium">{program.name}</p>
+                  {program.website && (
+                    <a 
+                      href={program.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors"
+                    >
+                      Learn More
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </a>
                   )}
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );

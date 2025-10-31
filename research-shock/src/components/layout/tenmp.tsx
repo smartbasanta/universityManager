@@ -220,8 +220,8 @@ export const Header = ({
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 w-full border-b border-gray-200">
-      <div className="w-full mx-auto">
-          <div className="px-4 sm:px-6 lg:px-40">
+      <div className="w-full max-w-[1600px] mx-auto">
+        <div className="px-4 sm:px-6 lg:px-40">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center flex-shrink-0">
