@@ -26,7 +26,7 @@ interface UniversityCardProps {
 }
 
 export const UniversityCard = ({ university }: UniversityCardProps) => {
-  const defaultImage = "/no-image.jpg"; // Placeholder for missing images
+  const defaultImage = "/no-image.jpg"; 
 
   return (
     <Link href={`/universities/${university.id}`} className="block">

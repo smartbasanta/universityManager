@@ -14,6 +14,7 @@ import type { University, UniversityQueryParams } from '@/hooks/api/website/univ
 import type { SearchFilters } from '@/types/universities/university';
 import type { UniversityListItem } from '@/types/universities/university';
 import { useDebounce } from '@/hooks/useDebounce';
+import { SearchX } from 'lucide-react';
 
 const transformApiDataToGridItems = (universities: University[]): UniversityListItem[] => {
   if (!universities) return [];
@@ -25,12 +26,12 @@ const transformApiDataToGridItems = (universities: University[]): UniversityList
     type: uni.overview?.university_type || 'Unknown',
     setting: uni.overview?.campus_setting || 'Unknown',
     image: uni.logo || uni.banner || '/no-image.jpg',
-    description: uni.description || uni.overview?.description || 'No description available.',
+    description: uni.about || uni.overview?.description || 'No description available.',    
     website: uni.website || '',
     address: uni.address || '',
     researchAreas: uni.research_hubs?.map(h => h.research_center) || [],
     establishedYear: 0,
-    studentCount: 0,
+    studentCount: 0,    
     ranking: 0,
     phone: '',
     email: '',
@@ -73,6 +74,10 @@ export default function UniversitiesPage() {
   });
 
   const debouncedSearch = useDebounce(filters.search, 500);
+  const hasActiveFilters =
+  filters.countries.length > 0 ||
+  filters.locations.length > 0 ||
+  filters.types.length > 0;
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -134,16 +139,20 @@ export default function UniversitiesPage() {
     >
       {/* Results Count */}
       <div className="mb-6">
-        <p className="text-sm text-gray-600">
-          {isLoading ? (
-            'Loading universities...'
-          ) : (
-            `Showing ${universityResponse?.data?.length || 0} ${
-              universityResponse?.data?.length === 1 ? 'university' : 'universities'
-            }`
-          )}
-        </p>
-      </div>
+  <p className="text-sm text-gray-600">
+    {isLoading ? (
+      'Loading universities...'
+    ) : isError ? (
+      'Failed to load results'
+    ) : gridUniversities.length === 0 ? (
+      'No universities match your criteria'
+    ) : (
+      `Showing ${gridUniversities.length} ${
+        gridUniversities.length === 1 ? 'university' : 'universities'
+      }`
+    )}
+  </p>
+</div>
 
       <div className="lg:grid lg:grid-cols-4 lg:gap-8">
         {/* Filters Column */}
@@ -160,27 +169,59 @@ export default function UniversitiesPage() {
           </div>
         </aside>
 
-        {/* Grid Column */}
-        <div className="lg:col-span-3">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
-                <UniversitySkeleton key={index} />
-              ))}
-            </div>
-          ) : isError ? (
-            <div className="text-center py-10 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-red-600 font-medium">Failed to load universities</p>
-              <p className="text-red-500 text-sm mt-1">Please try again later</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {gridUniversities.map((university) => (
-                <UniversityCard key={university.id} university={university} />
-              ))}
-            </div>
-          )}
-        </div>
+       <div className="lg:col-span-3">
+  {isLoading ? (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, index) => (
+        <UniversitySkeleton key={index} />
+      ))}
+    </div>
+  ) : isError ? (
+    <div className="text-center py-10 bg-red-50 rounded-lg border border-red-200">
+      <p className="text-red-600 font-medium">Failed to load universities</p>
+      <p className="text-red-500 text-sm mt-1">Please try again later</p>
+    </div>
+  ) : gridUniversities.length === 0 ? (
+    <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+    <div className="mx-auto max-w-md">
+      <div className="mx-auto mb-4 w-24 h-24 flex items-center justify-center text-gray-400">
+        <SearchX className="w-16 h-16" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">
+        No universities found
+      </h3>
+      <p className="text-gray-600 text-sm">
+        {filters.search
+          ? `We couldn't find any universities matching "${filters.search}".`
+          : 'Try adjusting your filters or search query.'}
+      </p>
+      {hasActiveFilters && (
+        <button
+          onClick={() => {
+            setFilters({
+              search: '',
+              countries: [],
+              locations: [],
+              types: [],
+              researchAreas: [],
+            });
+            router.replace(pathname, { scroll: false });
+          }}
+          className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm underline"
+        >
+          Clear all filters
+        </button>
+      )}
+    </div>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {gridUniversities.map((university) => (
+        <UniversityCard key={university.id} university={university} />
+      ))}
+    </div>
+  )}
+</div>
       </div>
     </PageLayout>
   );

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -9,15 +10,11 @@ import {
   Star,
   ExternalLink,
 } from "lucide-react";
-import type {
-  UniversityBasicInfo,
-  Ranking,
-} from "@/hooks/api/website/university.api";
+import { University } from "@/types/university";
 import { motion } from "framer-motion"; // Added for subtle animations
 
 interface UniversityHeaderProps {
-  basicInfo: UniversityBasicInfo;
-  rankings?: Ranking[];
+  basicInfo: University;
 }
 
 const UniversityHeaderActions = ({
@@ -61,11 +58,10 @@ const UniversityHeaderActions = ({
 
 export const UniversityHeader = ({
   basicInfo,
-  rankings,
 }: UniversityHeaderProps) => {
   if (!basicInfo) return null;
 
-  const { university_name: name, overview, about, website, logo, banner } =
+  const { university_name: name, overview, about, website, logo, banner, rankings } =
     basicInfo;
 
   const location = `${overview?.city || ""}${
@@ -75,13 +71,13 @@ export const UniversityHeader = ({
   }${overview?.country || ""}`.trim();
   const displayLocation = location || "Location not available";
   const description =
-    about || overview?.description || "No description available.";
+    about || "No description available.";
 
   const bannerImage = banner || "/classroom.jpg";
   const logoImage = logo || "/no-image.jpg";
 
-  const nationalRank = rankings?.find((r) => r.subject === "National");
-  const globalRank = rankings?.find((r) => r.subject === "Global");
+  const nationalRank = rankings?.find((r) => r.subject === "National Universities");
+  const globalRank = rankings?.find((r) => r.subject === "World University Rankings");
 
   return (
     <section
@@ -177,11 +173,10 @@ export const UniversityHeader = ({
           </p>
           <UniversityHeaderActions
             website={website}
-            email={overview?.email}
-            phone={overview?.phone_number}
           />
         </motion.div>
       </div>
     </section>
   );
 };
+

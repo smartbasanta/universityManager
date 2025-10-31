@@ -3,13 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import BookingSlotForm from '@/components/mentors/BookSlotForm';
 
-interface ApplyPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function AmbassadorApplyPage({ params }: ApplyPageProps) {
+export default function AmbassadorApplyPage({ params, searchParams }: { params: { id: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
   return (
     <div 
       className="relative flex flex-col bg-slate-50 min-h-screen" 
