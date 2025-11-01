@@ -1,98 +1,124 @@
-
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { OverviewCard } from './OverViewCard';
-import { RankingsCard } from './RankingsCard';
-import { StudentLifeCard } from './StudentLifeCard';
-import { SportsCard } from './SportsCard';
-import { University } from '@/types/university';
-import { UndergraduateCard } from './UndergraduateCard';
-import { GraduateCard } from './GraduateCard';
-import { CareerOutcomesCard } from './CareerOutcomesCard';
+import { GraduationCap, Building2, Award } from 'lucide-react';
+import { GeneralTabContent } from './GeneralTabContent';
+import { UndergraduateTabContent } from './UndergraduateTabContent';
+import { GraduateTabContent } from './GraduateTabContent';
+import type { UniversityBasicInfo } from '@/hooks/api/website/university.api';
 
 interface SchoolTabsProps {
-  university: University;
+  universityId: string;
+  initialData: UniversityBasicInfo;
 }
 
-export const SchoolTabs = ({ university }: SchoolTabsProps) => {
-  const [activeTab, setActiveTab] = useState('general');
+type TabType = 'general' | 'undergraduate' | 'graduate';
 
-  const tabs = [
-    {
-      id: 'general',
-      label: 'General Info',
-      content: <OverviewCard overview={university.overview} />,
-    },
-    {
-      id: 'undergraduate',
-      label: 'Undergraduate',
-      content: <UndergraduateCard admissions={university.undergraduate_admissions} tuition={university.undergraduate_tuition_fees} departments={university.undergraduate_departments} />,
-    },
-    {
-      id: 'graduate',
-      label: 'Graduate',
-      content: <GraduateCard admissions={university.graduate_admissions} tuition={university.graduate_tuition_fees} departments={university.graduate_departments} />,
-    },
-    {
-      id: 'career-outcomes',
-      label: 'Career Outcomes',
-      content: <CareerOutcomesCard careerOutcomes={university.career_outcomes} />,
-    },
-    {
-      id: 'rankings',
-      label: 'Rankings',
-      content: <RankingsCard rankings={university.rankings} />,
-    },
-    {
-      id: 'student-life',
-      label: 'Student Life',
-      content: <StudentLifeCard studentLife={university.student_life} />,
-    },
-    {
-      id: 'sports',
-      label: 'Sports',
-      content: <SportsCard sports={university.sports} />,
-    },
-  ];
+interface Tab {
+  id: TabType;
+  label: string;
+  icon: typeof GraduationCap;
+  color: string;
+}
+
+const tabs: Tab[] = [
+  {
+    id: 'general',
+    label: 'General Information',
+    icon: Building2,
+    color: 'blue'
+  },
+  {
+    id: 'undergraduate',
+    label: 'Undergraduate',
+    icon: GraduationCap,
+    color: 'green'
+  },
+  {
+    id: 'graduate',
+    label: 'Graduate',
+    icon: Award,
+    color: 'purple'
+  }
+];
+
+export const SchoolTabs = ({ universityId, initialData }: SchoolTabsProps) => {
+  const [activeTab, setActiveTab] = useState<TabType>('general');
+
+  const getColorClasses = (color: string, isActive: boolean) => {
+    const colors = {
+      blue: isActive 
+        ? 'border-blue-600 text-blue-600 bg-blue-50' 
+        : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300',
+      green: isActive 
+        ? 'border-green-600 text-green-600 bg-green-50' 
+        : 'border-transparent text-gray-500 hover:text-green-600 hover:border-green-300',
+      purple: isActive 
+        ? 'border-purple-600 text-purple-600 bg-purple-50' 
+        : 'border-transparent text-gray-500 hover:text-purple-600 hover:border-purple-300'
+    };
+    return colors[color as keyof typeof colors] || colors.blue;
+  };
 
   return (
-    <div className="w-full bg-white rounded-3xl shadow-xl p-6 md:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-1">
-                <div className="flex flex-col gap-2">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`relative whitespace-nowrap py-4 px-6 font-semibold text-base transition-all duration-300 text-left 
-                                ${
-                                activeTab === tab.id
-                                    ? 'text-blue-600 bg-blue-50 rounded-lg'
-                                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg'
-                                }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <div className="lg:col-span-3">
-                <AnimatePresence mode="wait">
+    <div className="bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4 py-8">
+        {/* Tab Navigation */}
+        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 mb-8 -mx-4 px-4">
+          <nav className="flex space-x-1 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    relative py-4 px-6 border-b-3 font-semibold text-sm
+                    transition-all duration-300 flex items-center gap-2 whitespace-nowrap
+                    ${getColorClasses(tab.color, isActive)}
+                  `}
+                >
+                  <Icon className="w-5 h-5" />
+                  {tab.label}
+                  
+                  {isActive && (
                     <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="py-4"
-                    >
-                    {tabs.find((tab) => tab.id === activeTab)?.content}
-                    </motion.div>
-                </AnimatePresence>
-            </div>
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-current"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
+
+        {/* Tab Content with Animation */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {activeTab === 'general' && (
+              <GeneralTabContent universityId={universityId} initialData={initialData} />
+            )}
+            {activeTab === 'undergraduate' && (
+              <UndergraduateTabContent universityId={universityId} />
+            )}
+            {activeTab === 'graduate' && (
+              <GraduateTabContent universityId={universityId} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

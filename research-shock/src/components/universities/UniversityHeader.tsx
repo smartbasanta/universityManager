@@ -11,7 +11,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { University } from "@/types/university";
-import { motion } from "framer-motion"; // Added for subtle animations
+import { motion } from "framer-motion"; 
 
 interface UniversityHeaderProps {
   basicInfo: University;

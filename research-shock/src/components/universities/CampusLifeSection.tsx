@@ -1,4 +1,3 @@
-// New component: sections/CampusLifeSection.tsx
 "use client";
 
 import { Home, Utensils, Dumbbell, Users } from 'lucide-react';
